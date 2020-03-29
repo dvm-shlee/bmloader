@@ -1,6 +1,7 @@
 from pandas import DataFrame
 import struct
 import numpy as np
+import pandas as pd
 
 
 # Global variables
@@ -236,3 +237,37 @@ def parse_comment_event(output, data_packet):
     output[packet_id]['Data'].append(struct.unpack('<I', data_packet[8:12])[0])
     output[packet_id]['Comment'].append(bytes.decode(data_packet[12:], 'latin-1').split('\x00', 1)[0])
     return output
+
+
+class BaseLoader():
+    def __init__(self):
+        self.ExtendedHeader = None
+        pass
+
+    def check_channel_map(self, arg):
+        if self.ExtendedHeader == None:
+            raise Exception
+
+        self.ChannelMap = pd.DataFrame(columns=['ID', 'Label'])
+        for idx in self.ExtendedHeader.keys():
+            label = self.ExtendedHeader[idx][arg]
+            ident = self.ExtendedHeader[idx]['Electrode_ID']
+            row = dict(ID=ident, Label=label)
+            self.ChannelMap = self.ChannelMap.append(row, ignore_index=True)
+        pd.set_option('display.max_rows', self.ChannelMap.shape[0]+1)
+        self.NumChannels = len(self.ChannelMap)
+
+    @staticmethod
+    def remove_code(data, code='\x00'):
+        return data[0].decode('latin-1').split(code, 1)[0]
+
+    @staticmethod
+    def decoding(bytes_string, dtype, start, num_bytes):
+        end = start + num_bytes
+        output = struct.unpack(dtype, bytes_string[start:end])
+        if len(output) == 1:
+            if 's' in dtype:
+                output = remove_code(output)
+            else:
+                output = output[0]
+        return output, start + num_bytes

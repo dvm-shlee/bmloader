@@ -15,7 +15,7 @@ __author__ = 'SungHo Lee'
 __email__ = 'shlee@unc.edu'
 __url__ = ''
 
-setup(name='bm-dataloader',
+setup(name='bmloader',
       version=__version__,
       description='Blackrock Microsystem Data Loader for Python',
       author=__author__,
