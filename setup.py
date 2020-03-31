@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/scripts/env python
 """
 Blackrock Microsystem Data Loader for Python
 """
