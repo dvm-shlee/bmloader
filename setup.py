@@ -28,20 +28,11 @@ setup(name='bmloader',
                         'pandas'],
       scripts=[],
       classifiers=[
-            # How mature is this project? Common values are
-            #  3 - Alpha
-            #  4 - Beta
-            #  5 - Production/Stable
             'Development Status :: 4 - Beta',
-
-            # Indicate who your project is intended for
             'Framework :: Jupyter',
             'Intended Audience :: Science/Research',
             'Topic :: Scientific/Engineering :: Electrophysiology',
             'Natural Language :: English',
-
-            # Specify the Python version you support here. In particular, ensure
-            # that you indicate whether you support Python 2, Python 3 or both
             'Programming Language :: Python :: 3.7',
       ],
       keywords = ''
