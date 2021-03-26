@@ -113,25 +113,21 @@ class openNSx(BaseLoader):
         dp_size = self.Data.Bytes[3]
         dp_type = self.Data.Type[3]
         loc = self.BasicHeader['Bytes_in_Headers'] + self.Data.Bytes[:3].sum()
-        ch_index = self.ChannelMap.index[self.ChannelMap['ID'] == ch_id].tolist()[0]
+        ch_index = int(self.ChannelMap.index[self.ChannelMap['ID'] == ch_id].tolist()[0])
         n_zpad = int(self.TimeStamp)
         fs = float(self.SamplingFreq)
 
         data = []
-        data.extend([0] * n_zpad)
-
-        self._fileobj.seek(loc + int(ch_index * dp_size), 0)
         if n_zpad < 0:
             n_zpad = 0
         if n_zpad != 0:
             data.extend([0] * n_zpad)
 
         stop = self.TotalDataPoints
-        num_dps = stop - self.TimeStamp
+        dp_index = np.arange(ch_index, int(self.NumDataPoints * self.NumChannels), self.NumChannels)
 
-        for dp in range(num_dps):
-            if not dp:
-                self._fileobj.seek(dp * (self.NumChannels - 1) * dp_size, 1)
+        for dp in dp_index:
+            self._fileobj.seek(loc + (dp * dp_size))
             data.append(struct.unpack(dp_type, self._fileobj.read(dp_size))[0])
 
         xp = np.linspace(0, stop / fs, len(data))

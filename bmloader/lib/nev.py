@@ -196,6 +196,7 @@ class openNEV(BaseLoader):
 
         eid = struct.unpack('<H', data_packet[4:6])[0]
         output['Timestamp'].append(struct.unpack('<I', data_packet[:4])[0])
+        # the classifier can be defined as string here
         output['Unit_Classification'].append(struct.unpack('B', data_packet[6:7])[0])
         output['Reserved'].append(struct.unpack('B', data_packet[7:8])[0])
 
@@ -212,7 +213,7 @@ class openNEV(BaseLoader):
 
         output['Waveform'].append(np.frombuffer(data_packet[8:],
                                                 dtype=data_type,
-                                                count=spike_width) * digit_factor)
+                                                count=spike_width).astype(np.int32))
         return output
 
     @disk_cache('_event', _cache_dir, method=True)
@@ -261,7 +262,7 @@ class openNEV(BaseLoader):
             self._set_events(ch_id)
         return np.asarray(self._events[ch_id]['Unit_Classification'])
 
-    def get_spike_timestamp(self, ch_id):
+    def get_spike_timestamp(self, ch_id, idx=True):
         """
         Parameters:
             ch_id:
@@ -271,7 +272,10 @@ class openNEV(BaseLoader):
         if ch_id not in self._events.keys():
             self._set_events(ch_id)
         fs = self.BasicHeader['TimeStamp_Resolution']
-        return np.asarray(self._events[ch_id]['Timestamp']) / fs
+        if idx:
+            return self._events[ch_id]['Timestamp']
+        else:
+            return np.asarray(self._events[ch_id]['Timestamp']) / fs
 
     def get_spike_waveforms(self, ch_id):
         """
