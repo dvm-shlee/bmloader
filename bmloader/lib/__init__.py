@@ -163,7 +163,7 @@ def remove_code(data, code='\x00'):
 def convert_winsystime_struct(date):
     wmonth = {1:'Jan',  2:'Feb',  3:'Mar',  4:'Apr',  5:'May',  6:'Jun',
               7:'Jul',  8:'Aug',  9:'Sep', 10:'Oct', 11:'Nov', 12:'Dec'}
-    wdow = {1:'Mon', 2:'Tue', 3:'Wed', 4:'Thr', 5:'Fri', 6:'Sat', 7:'Sun'}
+    wdow = {0: 'Sun', 1:'Mon', 2:'Tue', 3:'Wed', 4:'Thr', 5:'Fri', 6:'Sat', 7:'Sun'}
     return "{}.{}.{}({}), {}:{}:{}.{}".format(wmonth[date[1]],
                                               date[3],
                                               date[0],

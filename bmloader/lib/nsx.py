@@ -1,6 +1,6 @@
 import os
 from . import *
-from .utils import disk_cache
+from .utils import disk_cache, hashlib
 
 
 class openNSx(BaseLoader):
@@ -10,7 +10,7 @@ class openNSx(BaseLoader):
         super(openNSx, self).__init__()
         self._fileobj = None
         self._path = None
-
+        self._path_hash = None
         # References
         self.NEURALCD = NSX_BASIC
         self.CC = NSX_EXTENDED
@@ -43,6 +43,7 @@ class openNSx(BaseLoader):
             self._path = path
             self._fileobj = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
         self._filesize = len(self._fileobj)
+        self._path_hash = int(hashlib.sha1(self._path.encode('utf-8')).hexdigest(), 16) % (10 ** 8)
 
     def _parse_basic_header(self):
         if self._fileobj == None:
@@ -108,7 +109,7 @@ class openNSx(BaseLoader):
                     self.NumDataPoints = c
         self.TotalDataPoints = self.TimeStamp + self.NumDataPoints
 
-    @disk_cache('_ch_data', _cache_dir, method=True)
+    @disk_cache(f'_ch_data', _cache_dir, method=True)
     def _parse_data(self, ch_id, path):
         dp_size = self.Data.Bytes[3]
         dp_type = self.Data.Type[3]

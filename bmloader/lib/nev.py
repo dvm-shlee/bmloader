@@ -1,5 +1,5 @@
 from . import *
-from .utils import disk_cache
+from .utils import disk_cache, hashlib
 import os
 
 
@@ -9,6 +9,7 @@ class openNEV(BaseLoader):
     def __init__(self, path=None):
         super(openNEV, self).__init__()
         self._path = path
+        self._path_cache = None
         self._fileobj = None
         self._events_map = None
         self._events = dict()
@@ -35,10 +36,11 @@ class openNEV(BaseLoader):
         with open(path, 'rb') as f:
             self._fileobj = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
         self._filesize = len(self._fileobj)
+        self._path_hash = int(hashlib.sha1(self._path.encode('utf-8')).hexdigest(), 16) % (10 ** 8)
 
     @property
     def avail_events(self):
-        return sorted(list(self._events_map.keys()))
+        return sorted([k for k in self._events_map.keys() if isinstance(k, int)])
 
     def _parse_basic_header(self):
         if self._fileobj is None:
@@ -113,7 +115,7 @@ class openNEV(BaseLoader):
                         loc += row.Bytes
         self.check_channel_map('Label')
 
-    @disk_cache('_event_byte_loc', _cache_dir, method=True)
+    @disk_cache(f'_event_byte_loc', _cache_dir, method=True)
     def _parse_event_byte_loc(self, path):
         skip_size = self.BasicHeader['Bytes_in_Headers']
         dpacket_size = self.BasicHeader['Bytes_in_DataPackets']

@@ -32,7 +32,7 @@ def disk_cache(basename, directory, method=False):
     def wrapper(func):
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
-            key = (*tuple(args), *tuple(kwargs.items()))
+            key = (args[0]._path, *tuple(args), *tuple(kwargs.items()))
             if method and key:
                 key = key[1:]
             hash_input = []
