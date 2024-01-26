@@ -242,19 +242,14 @@ def parse_comment_event(output, data_packet):
 class BaseLoader():
     def __init__(self):
         self.ExtendedHeader = None
-        pass
 
     def check_channel_map(self, arg):
-        if self.ExtendedHeader == None:
+        if self.ExtendedHeader is None:
             raise Exception
 
-        self.ChannelMap = pd.DataFrame(columns=['ID', 'Label'])
-        for idx in self.ExtendedHeader.keys():
-            label = self.ExtendedHeader[idx][arg]
-            ident = self.ExtendedHeader[idx]['Electrode_ID']
-            row = dict(ID=ident, Label=label)
-            self.ChannelMap = self.ChannelMap.append(row, ignore_index=True)
-        pd.set_option('display.max_rows', self.ChannelMap.shape[0]+1)
+        channel_data = [{'ID': info['Electrode_ID'], 'Label': info[arg]} for idx, info in self.ExtendedHeader.items()]
+        self.ChannelMap = pd.DataFrame(channel_data, columns=['ID', 'Label'])
+        pd.set_option('display.max_rows', len(self.ChannelMap) + 1)
         self.NumChannels = len(self.ChannelMap)
 
     @staticmethod
@@ -266,8 +261,5 @@ class BaseLoader():
         end = start + num_bytes
         output = struct.unpack(dtype, bytes_string[start:end])
         if len(output) == 1:
-            if 's' in dtype:
-                output = remove_code(output)
-            else:
-                output = output[0]
-        return output, start + num_bytes
+            return (BaseLoader.remove_code(output) if 's' in dtype else output[0]), end
+        return output, end
